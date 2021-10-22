@@ -8,22 +8,19 @@
 import Foundation
 
 final class ChatRoomRepository: NSObject, ChatRoomRepositorible {
-    private var onInputStreamCompletion: () throws -> Void = { }
     private var outputStream: OutputStream?
     private var inputStream: InputStream?
     weak var delegate: DataConvertible?
+    private let streamConnector: StreamCreatable
+    
+    init(streamConnector: StreamCreatable) {
+        self.streamConnector = streamConnector
+    }
     
     func connect() {
-        var readStream: Unmanaged<CFReadStream>?
-        var writeStream: Unmanaged<CFWriteStream>?
-        
-        CFStreamCreatePairWithSocketToHost(kCFAllocatorDefault, StreamInformation.host as CFString, UInt32(StreamInformation.portNumber), &readStream, &writeStream)
-        
-        guard let readStreamRetainedValue = readStream?.takeRetainedValue(),
-              let writeStreamRetainedValue = writeStream?.takeRetainedValue() else { return }
-        
-        self.inputStream = readStreamRetainedValue
-        self.outputStream = writeStreamRetainedValue
+        guard let streams = streamConnector.createPairWithSocketToHost() else { return }
+        self.inputStream = streams.readStream
+        self.outputStream = streams.writeStream
         
         self.inputStream?.delegate = self
 
