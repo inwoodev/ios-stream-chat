@@ -54,6 +54,7 @@ class LoginViewController: UIViewController {
         button.setTitle("Login", for: .normal)
         button.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         button.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(login), for: .touchUpInside)
         return button
     }()
@@ -86,10 +87,13 @@ class LoginViewController: UIViewController {
     }
     
     @objc private func login(_ sender: UIButton) {
-        let chatRoomViewController = ChatRoomViewController()
-        if let userName = loginTextField.text {
-            chatRoomViewController.myUserName = userName
-        }
+        pushToChatRoomViewController()
+    }
+    
+    private func pushToChatRoomViewController() {
+        guard let userName = loginTextField.text else { return }
+        let chatRoomViewModel = ChatRoomViewModel(myUserName: userName)
+        let chatRoomViewController = ChatRoomViewController(chatRoomViewModel: chatRoomViewModel)
         loginTextField.text = nil
         loginTextField.resignFirstResponder()
         navigationController?.pushViewController(chatRoomViewController, animated: false)
@@ -121,13 +125,7 @@ class LoginViewController: UIViewController {
 }
 extension LoginViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        let chatRoomViewController = ChatRoomViewController()
-        if let userName = loginTextField.text {
-            chatRoomViewController.myUserName = userName
-        }
-        loginTextField.text = nil
-        loginTextField.resignFirstResponder()
-        navigationController?.pushViewController(chatRoomViewController, animated: false)
+        pushToChatRoomViewController()
         return true
     }
 }

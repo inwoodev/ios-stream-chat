@@ -11,11 +11,8 @@ class ChatRoomViewController: UIViewController {
     
     // MARK: - Properties
     
-    var myUserName = ""
-    private var chatList: [Message] = []
-    private let chatRoom = ChatRoom(chatNetworkManager: ChatNetworkManager())
     private var bottomConstraint: NSLayoutConstraint?
-    let prohibitedTexts = ["::END", "USR_NAME::", "LEAVE::", "MSG::"]
+    private let chatRoomViewModel: ChatRoomViewModel
     
     // MARK: - Views
     
@@ -57,6 +54,7 @@ class ChatRoomViewController: UIViewController {
         button.setTitle("send", for: .normal)
         button.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         button.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
         return button
     }()
@@ -72,28 +70,51 @@ class ChatRoomViewController: UIViewController {
     
     // MARK: - Methods
     
+    init(chatRoomViewModel: ChatRoomViewModel) {
+        self.chatRoomViewModel = chatRoomViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) is not supported")
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        chatRoom.joinChat(username: myUserName)
-        chatRoom.receiveChat()
+        chatRoomViewModel.joinChat()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        chatRoom.leaveChat()
+        chatRoomViewModel.leaveChat()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setUpChatRoomView()
+        addChatViews()
+        setUpChatRoomViewConstraints()
         setDelegates()
         changeLayoutWhenKeyboardShowsAndHides()
+        navigationItem.title = chatRoomViewModel.chatRoomTitle
+        updateChat()
+        
+    }
+    
+    private func updateChat() {
+        chatRoomViewModel.bind { [weak self] in
+            DispatchQueue.main.async {
+                guard let numberOfChats = self?.chatRoomViewModel.chats.count else { return }
+                
+                let indexPath = IndexPath(row: numberOfChats - 1, section: 0)
+                self?.chatMessageView.insertRows(at: [indexPath], with: .bottom)
+                self?.chatMessageView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+            }
+        }
     }
     
     private func setDelegates() {
         chatMessageView.dataSource = self
         messageInputTextField.delegate = self
-        chatRoom.delegate = self
     }
     
     private func changeLayoutWhenKeyboardShowsAndHides() {
@@ -129,38 +150,28 @@ class ChatRoomViewController: UIViewController {
     }
     
     @objc private func sendMessage(_ sender: UIButton) {
-        if let text = messageInputTextField.text,
-              text.isEmpty == false,
-              !prohibitedTexts.contains(where: {text.contains($0)}) {
-            
-            chatList.append(Message(content: text, senderUsername: "\(self.myUserName):", messageSender: .myself))
-            chatRoom.send(text)
-            messageInputTextField.text = nil
-            
-            let indexPath = IndexPath(row: chatList.count - 1, section: 0)
-            
-            chatMessageView.insertRows(at: [indexPath], with: .none)
-            chatMessageView.scrollToRow(at: indexPath, at: .bottom, animated: true)
-        } else {
-            alertInvalidTextFieldInputToUser()
-        }
+        guard let nonEmptytext = messageInputTextField.text else { return }
+        prepareToSendMessage(nonEmptytext)
+        
+        messageInputTextField.text = nil
     }
     
     private func scrollToLastChat() {
-        guard !chatList.isEmpty else { return }
+        guard !chatRoomViewModel.chats.isEmpty else { return }
         
-        let lastIndex = IndexPath(row: chatList.count - 1, section: 0)
+        let lastIndex = IndexPath(row: chatRoomViewModel.chats.count - 1, section: 0)
         
         chatMessageView.scrollToRow(at: lastIndex, at: .bottom, animated: true)
         
     }
     
-    private func setUpChatRoomView() {
-        navigationItem.title = "개울챗"
+    private func addChatViews() {
         self.view.addSubview(messageInputView)
         messageInputView.addSubview(messageInputStackView)
         self.view.addSubview(chatMessageView)
-        
+    }
+    
+    private func setUpChatRoomViewConstraints() {
         NSLayoutConstraint.activate([
             messageInputView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             messageInputView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
@@ -178,46 +189,14 @@ class ChatRoomViewController: UIViewController {
             chatMessageView.topAnchor.constraint(equalTo: self.view.topAnchor),
             chatMessageView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             chatMessageView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            chatMessageView.bottomAnchor.constraint(equalTo: self.messageInputView.topAnchor, constant: 10)
+            chatMessageView.bottomAnchor.constraint(equalTo: self.messageInputView.topAnchor)
         ])
     }
-}
-
-// MARK: - ChatReadable
-
-extension ChatRoomViewController: ChatReadable {
-    func fetchMessageFromServer(data: Data) {
-        guard let decodedMessageStringList = String(data: data, encoding: .utf8)?.components(separatedBy: "::"),
-              let userName = decodedMessageStringList.first,
-              let content = decodedMessageStringList.last else { return }
-        if userName != self.myUserName && decodedMessageStringList.count == 2 {
-            receiveMessage(username: "\(userName):", content: content)
-        } else if userName != self.myUserName && decodedMessageStringList.count == 1 {
-            receiveSystemMessage(content: content)
+    
+    private func prepareToSendMessage(_ validText: String) {
+        guard chatRoomViewModel.sendChat(with: validText, sender: .myself) else { return alertInvalidTextFieldInputToUser()
+            
         }
-    }
-    
-    private func receiveMessage(username: String, content: String) {
-        guard username.isEmpty == false,
-              content.isEmpty == false else { return }
-        
-        chatList.append(Message(content: content, senderUsername: username, messageSender: .someoneElse))
-        
-        let indexPath = IndexPath(row: chatList.count - 1, section: 0)
-        
-        chatMessageView.insertRows(at: [indexPath], with: .none)
-        chatMessageView.scrollToRow(at: indexPath, at: .bottom, animated: true)
-    }
-    
-    private func receiveSystemMessage(content: String) {
-        guard content.isEmpty == false else { return }
-        
-        chatList.append(Message(content: content, senderUsername: "", messageSender: .system))
-        
-        let indexPath = IndexPath(row: chatList.count - 1, section: 0)
-        
-        chatMessageView.insertRows(at: [indexPath], with: .none)
-        chatMessageView.scrollToRow(at: indexPath, at: .bottom, animated: true)
     }
 }
 
@@ -225,11 +204,11 @@ extension ChatRoomViewController: ChatReadable {
 
 extension ChatRoomViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return chatList.count
+        return chatRoomViewModel.chats.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let message = chatList[indexPath.row]
+        let message = chatRoomViewModel.chats[indexPath.row].message
         
         if message.messageSender == .myself {
             guard let cell = tableView.dequeueReusableCell(withIdentifier: MyMessageViewCell.identifier, for: indexPath) as? MyMessageViewCell else {
@@ -242,7 +221,7 @@ extension ChatRoomViewController: UITableViewDataSource {
             guard let cell = tableView.dequeueReusableCell(withIdentifier: OthersMessageViewCell.identifier, for: indexPath) as? OthersMessageViewCell else {
                 return UITableViewCell()
             }
-            cell.changeLabelText("\(message.senderUsername) \(message.content)")
+            cell.changeLabelText("\(message.senderUsername): \(message.content)")
             cell.setDateLabelText(Date().formattedString)
             return cell
         } else if message.messageSender == .system {
@@ -260,22 +239,15 @@ extension ChatRoomViewController: UITableViewDataSource {
 // MARK: - UITextFieldDelegate
 
 extension ChatRoomViewController: UITextFieldDelegate {
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if let text = textField.text,
-              text.isEmpty == false,
-              !prohibitedTexts.contains(where: {text.contains($0)}) {
+        guard let validText = textField.text else {
+            return false
             
-            chatList.append(Message(content: text, senderUsername: "\(self.myUserName):", messageSender: .myself))
-            chatRoom.send(text)
-            messageInputTextField.text = nil
-            
-            let indexPath = IndexPath(row: chatList.count - 1, section: 0)
-            
-            chatMessageView.insertRows(at: [indexPath], with: .none)
-            chatMessageView.scrollToRow(at: indexPath, at: .bottom, animated: true)
-        } else {
-            alertInvalidTextFieldInputToUser()
         }
+        prepareToSendMessage(validText)
+        messageInputTextField.text = nil
+        
         return true
     }
     
