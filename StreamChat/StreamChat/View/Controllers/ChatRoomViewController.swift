@@ -64,7 +64,6 @@ class ChatRoomViewController: UIViewController {
         button.backgroundColor = .systemGreen
         button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
         button.setTitle("send", for: .normal)
-//        button.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
         return button
