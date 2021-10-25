@@ -19,7 +19,7 @@
    - [입력 글자 제한 시나리오](#입력-글자-제한-시나리오)
 5. [Trouble shooting을 포함한 학습내용](#5-trouble-shooting을-포함한-학습내용)
    - [Stream, Socket, Port에 대한 애플공식문서 번역](https://velog.io/@inwoodev/Aug-09-2021-TIL-Today-I-Learned-Streams-Sockets-and-Ports)
-   - [소켓, Stream, 다양한 방법을 통한 iOS 앱 적용, 그리고 TroubleShooting](CFStreamCreatePairWithSocketToHost(_:_:_:_:_:))
+   - [소켓, Stream, 다양한 방법을 통한 iOS 앱 적용, 그리고 TroubleShooting](https://velog.io/@inwoodev/Oct-25-2021-TIL-Today-I-Learned-소켓-Stream-그리고-iOS앱-적용)
 6. [추후 개선사항](6-추후-개선사항)
    - [소켓연결 방식 개선](#소켓연결-방식-개선)
    - [아키텍처 개선](#아키텍처-개선)
@@ -89,7 +89,7 @@ View요소가 어떤 설정을 갖고 있고 View간의 제약사항이 어떻�
 
 **새로운 사용자가 채팅방 참가시 해당 참가자의 참여에 대한 메세지를 수신할 수 있습니다.**
 
-![entryNotification](https://raw.githubusercontent.com/inwoodev/uploadedImages/uploadedFiles/20211025014216.gif)
+![entryNotification](https://raw.githubusercontent.com/inwoodev/uploadedImages/uploadedFiles/20211026023044.gif)
 
 
 
@@ -97,7 +97,7 @@ View요소가 어떤 설정을 갖고 있고 View간의 제약사항이 어떻�
 
 **사용자 간의 실시간 대화내역이 화면에 표시됩니다.**
 
-![SendAndReceiveChat](https://raw.githubusercontent.com/inwoodev/uploadedImages/uploadedFiles/20211025015429.gif)
+![SendAndReceiveChat](https://raw.githubusercontent.com/inwoodev/uploadedImages/uploadedFiles/20211026023521.gif)
 
 
 
@@ -105,7 +105,7 @@ View요소가 어떤 설정을 갖고 있고 View간의 제약사항이 어떻�
 
 **다른 참가자 퇴장시 퇴장하였다는 메세지를 수신할 수 있습니다**
 
-![ExitNotification](https://raw.githubusercontent.com/inwoodev/uploadedImages/uploadedFiles/20211025015814.gif)
+![exitNotification](https://raw.githubusercontent.com/inwoodev/uploadedImages/uploadedFiles/20211026024739.gif)
 
 
 
@@ -407,7 +407,7 @@ struct MessageInterpreter: MessageInterpretable {
 
 [Stream, Socket, Port에 대한 애플공식문서 번역](https://velog.io/@inwoodev/Aug-09-2021-TIL-Today-I-Learned-Streams-Sockets-and-Ports)
 
-[소켓, Stream, 다양한 방법을 통한 iOS 앱 적용, 그리고 TroubleShooting](CFStreamCreatePairWithSocketToHost(_:_:_:_:_:))
+[소켓, Stream, 다양한 방법을 통한 iOS 앱 적용, 그리고 TroubleShooting](https://velog.io/@inwoodev/Oct-25-2021-TIL-Today-I-Learned-소켓-Stream-그리고-iOS앱-적용)
 
 
 
