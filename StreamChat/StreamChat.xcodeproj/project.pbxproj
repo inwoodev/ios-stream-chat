@@ -245,7 +245,6 @@
 		EAEB958326C55C4B001A500D /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				EAEB95CD26C66C83001A500D /* Protocols */,
 				EAEB958626C56307001A500D /* StreamInformation.swift */,
 				EAEB958826C580F0001A500D /* Message.swift */,
 				EAEB958A26C58138001A500D /* MessageSender.swift */,
@@ -253,13 +252,6 @@
 				EA47D88927219EF30092934D /* ChatWriteMode.swift */,
 			);
 			path = Model;
-			sourceTree = "<group>";
-		};
-		EAEB95CD26C66C83001A500D /* Protocols */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Protocols;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

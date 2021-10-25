@@ -8,5 +8,5 @@
 import Foundation
 
 protocol MessageInterpretable {
-    func interpret(_ mode: ChatWriteMode, checking message: Message) -> Data?
+    func interpret(_ mode: ChatWriteMode, checking text: String) -> Data?
 }

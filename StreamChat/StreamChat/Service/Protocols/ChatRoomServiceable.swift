@@ -8,5 +8,5 @@
 import Foundation
 
 protocol ChatRoomServiceable {
-    func convertToData(mode: ChatWriteMode, using message: Message) throws
+    func convertToData(mode: ChatWriteMode, using text: String) throws
 }

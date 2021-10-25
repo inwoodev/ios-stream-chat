@@ -10,12 +10,17 @@ import Foundation
 enum ChatWriteMode {
     case join, send, leave
     
-    func format(text: String) -> String {
+    func format(text: String?) -> String {
+        guard let validText = text else {
+            return ""
+            
+        }
+        
         switch self {
         case .join:
-            return "USR_NAME::\(text)::END"
+            return "USR_NAME::\(validText)::END"
         case .send:
-            return "MSG::\(text)::END"
+            return "MSG::\(validText)::END"
         case .leave:
             return "LEAVE::::END"
         }

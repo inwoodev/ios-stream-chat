@@ -44,9 +44,8 @@ final class ChatRoomViewModel: MessageReadable {
     }
     
     func sendChat(with userInput: String, sender: MessageSender) -> Bool {
-        let message = Message(content: userInput, senderUsername: myUserName, messageSender: .myself)
         do {
-            try self.chatRoomService.convertToData(mode: .send, using: message)
+            try self.chatRoomService.convertToData(mode: .send, using: userInput)
             return true
         } catch {
             NSLog("Error Message : \(error)")
@@ -56,13 +55,11 @@ final class ChatRoomViewModel: MessageReadable {
     }
     
     func joinChat() {
-        let joinMessage = Message(content: "", senderUsername: myUserName, messageSender: .system)
-        try? self.chatRoomService.convertToData(mode: .join, using: joinMessage)
+        try? self.chatRoomService.convertToData(mode: .join, using: myUserName)
     }
     
     func leaveChat() {
-        let leaveMessage = Message(content: "", senderUsername: "", messageSender: .system)
-        try? self.chatRoomService.convertToData(mode: .leave, using: leaveMessage)
+        try? self.chatRoomService.convertToData(mode: .leave, using: "")
     }
     
     private func examineMessageSender(decodedTexts: [String]) throws -> Message {

@@ -31,8 +31,8 @@ final class ChatRoomService: DataConvertible, ChatRoomServiceable {
         delegate?.readTexts(textArray)
     }
     
-    func convertToData(mode: ChatWriteMode, using message: Message) throws {
-        guard let data = messageInterpreter.interpret(mode, checking: message) else {
+    func convertToData(mode: ChatWriteMode, using text: String) throws {
+        guard let data = messageInterpreter.interpret(mode, checking: text) else {
             throw DataError.unableToWriteGivenData
         }
         

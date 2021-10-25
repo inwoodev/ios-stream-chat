@@ -10,17 +10,17 @@ import Foundation
 struct MessageInterpreter: MessageInterpretable {
     private let prohibitedUserInputTexts = ["::END", "USR_NAME::", "LEAVE::", "MSG::"]
     
-    func interpret(_ mode: ChatWriteMode, checking message: Message) -> Data? {
+    func interpret(_ mode: ChatWriteMode, checking text: String) -> Data? {
         var data: Data?
         switch mode {
         case .join:
-            data = mode.format(text: message.senderUsername).data(using: .utf8)
+            data = mode.format(text: text).data(using: .utf8)
         case .send:
-            if !prohibitedUserInputTexts.contains(where: {message.content.contains($0)}) {
-                data = mode.format(text: message.content).data(using: .utf8)
+            if !prohibitedUserInputTexts.contains(where: {text.contains($0)}) {
+                data = mode.format(text: text).data(using: .utf8)
             }
         case .leave:
-            data = mode.format(text: "").data(using: .utf8)
+            data = mode.format(text: nil).data(using: .utf8)
         }
         return data
     }
